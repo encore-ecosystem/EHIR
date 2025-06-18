@@ -1,0 +1,15 @@
+# IDE configs
+.idea
+.zed
+.vscode
+
+# Venv
+.venv
+
+# Caches
+__pycache__
+.ruff_cache
+.pytest_cache
+
+# Builds
+dist

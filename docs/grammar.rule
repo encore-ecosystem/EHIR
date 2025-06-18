@@ -1,0 +1,147 @@
+$section Lexer start
+
+# Atomics
+IDENTIFIER := "[a-zA-Z_][a-zA-Z0-9_]*"
+INTEGER    := "[0-9]+[_i\d+]"
+
+# Operators
+OP_ASN := "="
+
+OP_ADD := "+"
+OP_SUB := "-"
+OP_MUL := "*"
+OP_DIV := "/"
+
+OP_GRT := ">"
+OP_GEQ := ">="
+OP_LES := "<"
+OP_LEQ := "<="
+OP_IEQ := "=="
+OP_NEQ := "!="
+OP_LSH := "<<"
+OP_RSH := ">>"
+OP_XOR := "^"
+
+OP_NOT := "(!)|(not)"
+OP_OR  := "(\|)|(or)"
+OP_AND := "(&)|(and)"
+
+OP_ARW := "->"
+
+# Keywords
+KW_FN     := "fn"
+KW_FOR    := "for"
+KW_WHILE  := "while"
+KW_LOOP   := "loop"
+KW_DO     := "do"
+KW_RET    := "ret"
+KW_LET    := "let"
+KW_FROM   := "from"
+KW_IMPORT := "import"
+KW_PUB    := "pub"
+KW_IF     := "if"
+KW_ELIF   := "elif"
+KW_ELSE   := "else"
+KW_STRUCT := "struct"
+KW_BOOL   := "true" | "false"
+
+# Control Flow
+KW_BREAK    := "break"
+KW_CONTINUE := "continue"
+
+# Punctuators
+DOT         := "."
+COMMA       := ","
+COLON       := ":"
+SEMICOLON   := ";"
+LEFT_PAREN  := "("
+RIGHT_PAREN := ")"
+LEFT_BRACE  := "{"
+RIGHT_BRACE := "}"
+
+# Whitespaces
+SPACE   := " "
+NEWLINE := "\n"
+TAB     := "\t"
+EOF     := "\0"
+
+# Comments
+ONE_LINE_COMMENT   := "// [^(\n)]*"
+MULTI_LINE_COMMENT := "/\* [^(\*/)] \*/"
+
+$section Parser
+
+parse = top_level_statement*
+top_level_statement = function_definition
+                    | variable_declaration
+                    | import_statement
+                    | struct_definition
+
+function_definition  = KW_PUB? KW_FN IDENTIFIER LEFT_PAREN arguments? RIGHT_PAREN func_type block
+struct_definition    = KW_PUB? KW_STRUCT IDENTIFIER LEFT_BRACE arguments? RIGHT_BRACE
+variable_declaration = KW_LET assignment
+
+block = LEFT_BRACE statement* RIGHT_BRACE
+
+statement = variable_declaration
+          | assignment
+          | do_while
+          | while
+          | loop
+          | conditional
+          | expression
+          | break
+          | continue
+          | ret
+
+assignment = IDENTIFIER type OP_ASN expression
+
+# Loops
+do_while = KW_DO block KW_WHILE expression
+while    = KW_WHILE expression block
+loop     = KW_LOOP block
+
+# Control flow
+break    = KW_BREAK
+continue = KW_CONTINUE
+ret      = KW_RET expression
+
+# if-elif-else
+conditional = KW_IF expression block (KW_ELIF expression block)* (KW_ELSE block)? 
+
+# Operators precedence
+expression = logic_or
+
+logic_or   = logic_xor ( OP_OR logic_xor )*
+logic_xor  = logic_and ( OP_XOR logic_and )*
+logic_and  = equality ( OP_AND equality )*
+equality   = comparison ( ( OP_IEQ | OP_NEQ ) comparison )*
+comparison = shift ( ( OP_LES | OP_LEQ | OP_GRT | OP_GEQ ) shift )*
+shift      = term ( ( OP_SHL | OP_SHR ) term )*
+term       = factor ( ( OP_ADD | OP_SUB ) factor )*
+factor     = unary ( ( OP_MUL | OP_DIV | OP_MOD ) unary )*
+unary      = ( OP_ADD | OP_SUB )? primary
+
+primary    = IDENTIFIER
+           | INTEGER
+           | LEFT_PAREN expression RIGHT_PAREN
+           | call
+           | struct_initialization
+           | method_access
+
+#
+method_access = IDENTIFIER [DOT IDENTIFIER]*
+
+call = IDENTIFIER LEFT_PAREN ( expression [COMMA expression]* )? RIGHT_PAREN
+
+import_statement = KW_FROM IDENTIFIER KW_IMPORT IDENTIFIER (COMMA IDENTIFIER)*
+
+argument = IDENTIFIER type?
+
+arguments = argument ( COMMA argument)*
+
+func_type = OP_ARW IDENTIFIER
+
+type = COLON IDENTIFIER
+
+struct_initialization = IDENTIFIER LEFT_BRACE (expression [COMMA expression]*)? RIGHT_BRACE

@@ -1,0 +1,15 @@
+[project]
+name = "ehir"
+version = "0.0.1"
+description = "Encore High Intermediate Representation"
+readme = "README.md"
+authors = [
+    { name = "Maksim Shushkevich", email = "m.e.shushkevich@yandex.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
