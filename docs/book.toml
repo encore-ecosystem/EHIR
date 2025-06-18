@@ -1,5 +1,6 @@
 [book]
 authors = ["Maksim Shushkevich"]
-language = "en"
+language = "ru"
 src = "pages"
-title = "Encore Programming Language"
+title = "Encore High Intermediate Representation"
+

@@ -1,0 +1,13 @@
+$imports
+imp basic_module, basic_symbol
+
+$struct_decls
+
+$struct_defs
+
+$func_decls ;
+
+; #[from_libc, unsafe]
+; pub fn malloc(usize size) -> i8*
+
+$func_defs
